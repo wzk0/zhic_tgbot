@@ -2,10 +2,10 @@ from datetime import datetime as dt
 # import requests
 import json
 
-week=16
+week=17
 weekday=dt.now().isoweekday()
 
-# cookies={'SESSION':'82354325-370a-4fe3-bb88-e1e73aa55e8b','__pstsid__':'958bed94a877d4042f8d5d1be1340895|2ecc70d2efff2cf52e9cf96991d9fa5b'}
+# cookies={'SESSION':'','__pstsid__':''}
 
 # r=requests.get('https://eams.tjzhic.edu.cn/student/for-std/course-table/semester/41/print-data?semesterId=41&hasExperiment=true',cookies=cookies)
 # data=json.loads(r.text)['studentTableVms'][0]['activities']

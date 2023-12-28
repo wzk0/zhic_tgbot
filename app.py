@@ -2,7 +2,7 @@ import telebot
 from my_class import get_today
 import random
 
-API_TOKEN='1871971135:AAFNwRhEX2P-AcQy2AuWtpDMe-SPlha6Ny8'
+API_TOKEN='TOKEN'
 bot=telebot.TeleBot(API_TOKEN,parse_mode='MARKDOWN')
 
 @bot.message_handler(commands=['help','start'])
