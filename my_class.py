@@ -1,24 +1,30 @@
-from datetime import datetime as dt
-# import requests
 import json
 
-week=17
-weekday=dt.now().isoweekday()
+with open('data.json', 'r', encoding='utf-8') as f:
+    data = json.loads(f.read())['studentTableVms'][0]
 
-# cookies={'SESSION':'','__pstsid__':''}
+info = []
 
-# r=requests.get('https://eams.tjzhic.edu.cn/student/for-std/course-table/semester/41/print-data?semesterId=41&hasExperiment=true',cookies=cookies)
-# data=json.loads(r.text)['studentTableVms'][0]['activities']
-with open('data.json','r')as f:
-	data=json.loads(f.read())['studentTableVms'][0]['activities']
-lesson_data=[]
-for d in data:
-	lesson_data.append({'课程代码':d['courseCode'],'课程名称':d['courseName'],'上课周':d['weekIndexes'],'上课周数':str(d['periodInfo']['weeks']),'教室':d['room'],'教学楼':d['building'],'校区':d['campus'],'星期':d['weekday'],'老师':d['teachers'],'课程类型':d['courseType']['nameZh'],'学分':str(d['credits']),'课时':str(d['periodInfo']['total']),'上课时间':d['startTime'],'下课时间':d['endTime']})
+for d in data['activities']:
+    info.append({'name': d['courseName'], 'week': d['weekIndexes'], 'weekday': d['weekday'],
+                 'room': '%s %s' % (d['building'], d['room']),
+                 'lesson_number': '%s-%s' % (d['startUnit'], d['endUnit']),
+                 'lesson_time': '%s-%s' % (d['startTime'], d['endTime']), 'index': d['startUnit']})
 
-def get_today(weekday=weekday,week=week):
-	today=[]
-	for dd in lesson_data:
-		if (week in dd['上课周']) and (weekday==dd['星期']):
-			today.append(dd)
-	return today
 
+def get_user():
+    return {'department': data['department'], 'major': data['major'], 'adminclass': data['adminclass'],
+            'code': data['code'], 'name': data['name']}
+
+
+def search(week, weekday):
+    if weekday % 7 == 0:
+        weekday = 7
+    else:
+        weekday = weekday % 7
+    result = []
+    for i in info:
+        if week in i['week']:
+            if weekday == i['weekday']:
+                result.append(i)
+    return sorted(result, key=lambda r: r['index']), {'week': week, 'weekday': weekday}
