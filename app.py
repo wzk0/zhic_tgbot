@@ -1,9 +1,12 @@
+import json
+
 import telebot
 from my_class import search, get_user
 from datetime import datetime
 import requests
 
 API_TOKEN = ''
+AI_KEY = ''
 ADMIN = 1855411421
 bot = telebot.TeleBot(API_TOKEN, parse_mode='MARKDOWN')
 date = datetime(2024, 9, 2)
@@ -50,8 +53,14 @@ def tomorrow(message):
 @bot.message_handler(regexp='/get *')
 def get(message):
     info = message.text.split(' ')
-    data, date = search(int(info[-2]), int(info[-1]))
-    reply_to_msg(message, data, date)
+    if len(info) == 2:
+        all_data = []
+        for r in range(1, 7):
+            data, date = search(int(info[-1]), r)
+            reply_to_msg(message, data, date)
+    else:
+        data, date = search(int(info[-2]), int(info[-1]))
+        reply_to_msg(message, data, date)
 
 
 @bot.message_handler(regexp='/ota *')
@@ -62,9 +71,9 @@ def ota(message):
         try:
             req = requests.get(message.text.split(' ')[-1])
         except requests.exceptions.MissingSchema:
-            bot.reply_to(message,'OTA失败, 链接格式有误❌')
-        if req.status_code!=200:
-            bot.reply_to(message,'OTA失败, 错误状态码: %s❌'%req.status_code)
+            bot.reply_to(message, 'OTA失败, 链接格式有误❌')
+        if req.status_code != 200:
+            bot.reply_to(message, 'OTA失败, 错误状态码: %s❌' % req.status_code)
         else:
             with open('data.json', 'w', encoding='utf-8') as file:
                 file.write(req.text)
@@ -74,8 +83,13 @@ def ota(message):
 
 
 @bot.message_handler(func=lambda message: True)
-def echo_message(message):
-    bot.reply_to(message, message.text)
+def ai(message):
+    data = json.dumps(
+        {'model': 'gemini-1.5-pro', "messages": [{"role": "user", "content": message.text}], "max_tokens": 512,
+         "stream": False})
+    headers = {'content-type': 'application/json', 'Authorization': f"Bearer {AI_KEY}"}
+    ai_reply = json.loads(requests.post('https://api.aimlapi.com/chat/completions', headers=headers, data=data).text)
+    bot.reply_to(message, ai_reply['choices'][0]['message']['content'])
 
 
 bot.infinity_polling()
